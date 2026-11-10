@@ -90,6 +90,8 @@ export type Database = {
           city: string;
           created_at: string;
           id: string;
+          pause_end: string | null;
+          pause_start: string | null;
           phone: string | null;
           slot_step_minutes: number;
           slug: string;
@@ -100,6 +102,8 @@ export type Database = {
           city: string;
           created_at?: string;
           id: string;
+          pause_end?: string | null;
+          pause_start?: string | null;
           phone?: string | null;
           slot_step_minutes?: number;
           slug: string;
@@ -110,6 +114,8 @@ export type Database = {
           city?: string;
           created_at?: string;
           id?: string;
+          pause_end?: string | null;
+          pause_start?: string | null;
           phone?: string | null;
           slot_step_minutes?: number;
           slug?: string;

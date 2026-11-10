@@ -34,9 +34,8 @@ revoke all on public.opening_breaks from anon;
 revoke all on public.opening_breaks from authenticated;
 grant select, insert, delete on public.opening_breaks to authenticated;
 
--- L'ancienne pause unique est remplacée par opening_breaks (aucune donnée à reprendre au moment
--- de cette migration : aucune pause n'avait été enregistrée).
-alter table public.pros drop column pause_start, drop column pause_end;
+-- L'ancienne pause unique (pros.pause_start / pros.pause_end) est remplacée par opening_breaks.
+-- Ces colonnes ne sont plus utilisées ; elles seront supprimées dans une prochaine migration.
 
 -- Intervalle entre deux débuts de créneau en mode automatique (30 min par défaut).
 alter table public.pros
