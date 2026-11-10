@@ -20,7 +20,9 @@ export default async function ServicesPage({ searchParams }: PageProps<"/espace"
     supabase.from("pros").select("id").eq("id", userId).maybeSingle(),
     supabase
       .from("services")
-      .select("id, name, duration_min, price_cents, description, active")
+      .select(
+        "id, name, duration_min, price_cents, description, active, addon_name, addon_price_cents, addon_duration_min",
+      )
       .order("position")
       .order("created_at"),
   ]);
@@ -46,6 +48,12 @@ export default async function ServicesPage({ searchParams }: PageProps<"/espace"
                 </p>
                 <p className="text-sm text-mute">{formatDuration(s.duration_min)}</p>
                 {s.description && <p className="mt-1 max-w-[34ch] text-sm text-mute">{s.description}</p>}
+                {s.addon_name && s.addon_price_cents !== null && (
+                  <p className="mt-1 text-sm font-semibold">
+                    Option : {s.addon_name} · +{formatPrice(s.addon_price_cents)}
+                    {s.addon_duration_min ? ` · +${formatDuration(s.addon_duration_min)}` : ""}
+                  </p>
+                )}
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-lg font-semibold tabular-nums">{formatPrice(s.price_cents)}</p>

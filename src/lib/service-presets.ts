@@ -1,5 +1,12 @@
 // Raccourcis proposés à la création d'une prestation (repris du prototype espace pro).
-export const SERVICE_PRESETS = [
+type ServicePreset = {
+  name: string;
+  duration: number;
+  description: string;
+  addon?: { name: string; duration: number };
+};
+
+export const SERVICE_PRESETS: readonly ServicePreset[] = [
   {
     name: "Pose wispy",
     duration: 150,
@@ -28,10 +35,6 @@ export const SERVICE_PRESETS = [
     duration: 60,
     description:
       "Courbure et relèvement de tes cils naturels, sans extensions. L’effet dure plusieurs semaines.",
+    addon: { name: "Teinture de cils", duration: 15 },
   },
-  {
-    name: "Teinture de cils",
-    duration: 30,
-    description: "Coloration de tes cils naturels pour un regard plus intense, sans mascara.",
-  },
-] as const;
+];
