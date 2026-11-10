@@ -12,13 +12,10 @@ export default async function HoursPage() {
   const userId = claims?.claims.sub;
   if (!userId) redirect("/connexion");
 
-  const [{ data: pro }, { data: rows }] = await Promise.all([
-    supabase
-      .from("pros")
-      .select("pause_start, pause_end, buffer_minutes")
-      .eq("id", userId)
-      .maybeSingle(),
-    supabase.from("opening_hours").select("weekday, is_open, start_time, end_time"),
+  const [{ data: pro }, { data: rows }, { data: breaks }] = await Promise.all([
+    supabase.from("pros").select("slot_step_minutes, buffer_minutes").eq("id", userId).maybeSingle(),
+    supabase.from("opening_hours").select("weekday, is_open, slot_mode, start_time, end_time, fixed_times"),
+    supabase.from("opening_breaks").select("weekday, start_time, end_time").order("start_time"),
   ]);
   if (!pro) redirect("/espace/studio");
 
@@ -27,12 +24,20 @@ export default async function HoursPage() {
     ? {
         days: DEFAULT_SCHEDULE.days.map((d) => {
           const row = rows.find((r) => r.weekday === d.weekday);
-          return row
-            ? { weekday: d.weekday, isOpen: row.is_open, start: toHHMM(row.start_time), end: toHHMM(row.end_time) }
-            : { ...d, isOpen: false };
+          if (!row) return { ...d, isOpen: false };
+          return {
+            weekday: d.weekday,
+            isOpen: row.is_open,
+            mode: row.slot_mode === "fixed" ? "fixed" : "auto",
+            start: toHHMM(row.start_time),
+            end: toHHMM(row.end_time),
+            breaks: (breaks ?? [])
+              .filter((b) => b.weekday === d.weekday)
+              .map((b) => ({ start: toHHMM(b.start_time), end: toHHMM(b.end_time) })),
+            fixedTimes: row.fixed_times.map(toHHMM),
+          };
         }),
-        pauseStart: pro.pause_start ? toHHMM(pro.pause_start) : "",
-        pauseEnd: pro.pause_end ? toHHMM(pro.pause_end) : "",
+        step: String(pro.slot_step_minutes),
         buffer: String(pro.buffer_minutes),
       }
     : DEFAULT_SCHEDULE;
