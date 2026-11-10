@@ -12,11 +12,10 @@ Il faut [Node.js](https://nodejs.org) version 20 ou plus.
 
 ```bash
 npm install
-cp .env.example .env.local   # puis remplir les valeurs
 npm run dev                  # ouvre http://localhost:3000
 ```
 
-Autres commandes : `npm run build` (vérifie que tout compile), `npm run lint` (vérifie le code).
+Autres commandes : `npm run build` (vérifie que tout compile), `npm run lint` (vérifie le code), `npm test` (tests automatiques).
 
 ## Mise en ligne : les comptes à créer (étape 0)
 
@@ -34,18 +33,13 @@ Les serveurs sont réglés sur Paris (`vercel.json`, région `cdg1`).
 
 ### 2. Supabase (base de données et comptes)
 
-Supabase servira à partir de l’étape 1. Tu peux le créer dès maintenant :
+Projet `Lashly`, région West EU (Irlande). L’URL et la clé « publishable » sont publiques et déjà dans le code (`src/lib/supabase/config.ts`) : rien à coller dans Vercel. La clé secrète n’est pas utilisée.
 
-1. Va sur [supabase.com](https://supabase.com), clique sur **Start your project** et connecte-toi avec GitHub.
-2. Clique sur **New project** :
-   - **Name** : `lashly`
-   - **Database Password** : clique sur **Generate a password** et garde-le dans un gestionnaire de mots de passe
-   - **Region** : **Central EU (Frankfurt)** ou **West EU (Paris)**, obligatoirement en Europe (RGPD)
-3. Une fois le projet prêt, va dans **Project Settings > API** et récupère :
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon public** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role** → `SUPABASE_SERVICE_ROLE_KEY` (secrète : ne la partage jamais, ne l’envoie pas par message)
-4. Dans Vercel, ouvre le projet, va dans **Settings > Environment Variables** et ajoute ces trois valeurs (mêmes noms qu’au-dessus).
+Réglages faits une fois dans le tableau de bord Supabase :
+- **Authentication > URL Configuration** : *Site URL* = `https://lashly-seven.vercel.app`, et `https://lashly-seven.vercel.app/**` dans *Redirect URLs*.
+- **Authentication > Sign In / Providers > Email** : *Confirm email* désactivé tant que l’envoi d’emails (Resend, étape 7) n’est pas branché.
+
+La structure de la base est dans `supabase/migrations/` (déjà appliquée au projet). Les fichiers `supabase/tests/*.sql` vérifient que chaque pro ne voit que ses données : à lancer dans *SQL Editor*, tout est annulé à la fin.
 
 ### 3. Resend (emails)
 
