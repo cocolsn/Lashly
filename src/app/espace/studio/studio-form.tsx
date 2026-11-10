@@ -22,6 +22,7 @@ export function StudioForm({ initial, siteHost }: StudioFormProps) {
 
   return (
     <form action={formAction} noValidate>
+      {!initial && <input type="hidden" name="is_new" value="1" />}
       <Field
         name="studio_name"
         label="Nom du studio"
