@@ -2,78 +2,93 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { slugError } from "@/lib/slug";
+import { parsePriceToCents } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
-export type StudioValues = {
-  studio_name: string;
-  city: string;
-  phone: string;
-  slug: string;
+export type ServiceValues = {
+  name: string;
+  duration: string;
+  price: string;
+  description: string;
+  active: boolean;
 };
 
-export type StudioState = {
-  values?: StudioValues;
-  fieldErrors?: Partial<Record<keyof StudioValues, string>>;
+export type ServiceState = {
+  values?: ServiceValues;
+  fieldErrors?: Partial<Record<keyof ServiceValues, string>>;
   error?: string;
-  saved?: boolean;
 };
 
-function readValues(formData: FormData): StudioValues {
-  const text = (key: keyof StudioValues) => String(formData.get(key) ?? "").trim();
-  return {
-    studio_name: text("studio_name").replace(/\s+/g, " "),
-    city: text("city").replace(/\s+/g, " "),
-    phone: text("phone"),
-    slug: text("slug").toLowerCase(),
-  };
-}
-
-function validate(values: StudioValues): StudioState["fieldErrors"] {
-  const errors: StudioState["fieldErrors"] = {};
-  if (values.studio_name.length < 2 || values.studio_name.length > 80) {
-    errors.studio_name = "Indique le nom de ton studio (2 à 80 caractères).";
-  }
-  if (values.city.length < 2 || values.city.length > 80) {
-    errors.city = "Indique la ville de ton studio.";
-  }
-  const digits = values.phone.replace(/\D/g, "");
-  if (values.phone && (!/^[+\d\s.()-]+$/.test(values.phone) || digits.length < 9 || digits.length > 15)) {
-    errors.phone = "Indique un numéro valide, par exemple 06 12 34 56 78.";
-  }
-  const slug = slugError(values.slug);
-  if (slug) errors.slug = slug;
-  return errors;
-}
-
-export async function saveStudio(_prev: StudioState, formData: FormData): Promise<StudioState> {
-  const values = readValues(formData);
-  const fieldErrors = validate(values);
-  if (fieldErrors && Object.keys(fieldErrors).length > 0) return { values, fieldErrors };
-
+async function requireUserId() {
   const supabase = await createClient();
-  const { data: claims } = await supabase.auth.getClaims();
-  const userId = claims?.claims.sub;
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
   if (!userId) redirect("/connexion");
+  return { supabase, userId };
+}
 
-  const { error } = await supabase.from("pros").upsert({
-    id: userId,
-    studio_name: values.studio_name,
-    city: values.city,
-    phone: values.phone || null,
-    slug: values.slug,
-  });
+export async function saveService(_prev: ServiceState, formData: FormData): Promise<ServiceState> {
+  const id = String(formData.get("id") ?? "");
+  const values: ServiceValues = {
+    name: String(formData.get("name") ?? "").trim().replace(/\s+/g, " "),
+    duration: String(formData.get("duration") ?? "").trim(),
+    price: String(formData.get("price") ?? "").trim(),
+    description: String(formData.get("description") ?? "").trim(),
+    active: formData.get("active") === "on",
+  };
 
-  if (error?.code === "23505") {
-    return {
-      values,
-      fieldErrors: { slug: "Cette adresse est déjà prise. Ajoute ta ville ou ton prénom, par exemple." },
-    };
+  const fieldErrors: ServiceState["fieldErrors"] = {};
+  if (values.name.length < 2 || values.name.length > 80) {
+    fieldErrors.name = "Indique le nom de la prestation (2 à 80 caractères).";
   }
+  const duration = Number(values.duration);
+  if (!Number.isInteger(duration) || duration < 15 || duration > 600 || duration % 5 !== 0) {
+    fieldErrors.duration = "Indique une durée de 15 à 600 minutes (par 5 minutes).";
+  }
+  const priceCents = parsePriceToCents(values.price);
+  if (priceCents === null || priceCents > 100000) {
+    fieldErrors.price = "Indique un prix en euros, par exemple 80 ou 45,50.";
+  }
+  if (values.description.length > 1000) {
+    fieldErrors.description = "La description doit faire 1 000 caractères maximum.";
+  }
+  if (Object.keys(fieldErrors).length > 0 || priceCents === null) return { values, fieldErrors };
+
+  const { supabase, userId } = await requireUserId();
+  const row = {
+    name: values.name,
+    duration_min: duration,
+    price_cents: priceCents,
+    description: values.description || null,
+    active: values.active,
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await supabase.from("services").update(row).eq("id", id));
+  } else {
+    const { data: last } = await supabase
+      .from("services")
+      .select("position")
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    ({ error } = await supabase
+      .from("services")
+      .insert({ ...row, pro_id: userId, position: (last?.position ?? 0) + 1 }));
+  }
+
   if (error) return { values, error: "L’enregistrement n’a pas marché. Réessaie dans un instant." };
 
   revalidatePath("/espace");
-  return { values, saved: true };
+  redirect("/espace");
+}
+
+export async function deleteService(id: string) {
+  const { supabase } = await requireUserId();
+  await supabase.from("services").delete().eq("id", id);
+  revalidatePath("/espace");
+  redirect("/espace");
 }
 
 export async function signOut() {

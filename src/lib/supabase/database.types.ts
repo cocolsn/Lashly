@@ -41,6 +41,50 @@ export type Database = {
         };
         Relationships: [];
       };
+      services: {
+        Row: {
+          active: boolean;
+          created_at: string;
+          description: string | null;
+          duration_min: number;
+          id: string;
+          name: string;
+          position: number;
+          price_cents: number;
+          pro_id: string;
+        };
+        Insert: {
+          active?: boolean;
+          created_at?: string;
+          description?: string | null;
+          duration_min: number;
+          id?: string;
+          name: string;
+          position?: number;
+          price_cents: number;
+          pro_id: string;
+        };
+        Update: {
+          active?: boolean;
+          created_at?: string;
+          description?: string | null;
+          duration_min?: number;
+          id?: string;
+          name?: string;
+          position?: number;
+          price_cents?: number;
+          pro_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "services_pro_id_fkey";
+            columns: ["pro_id"];
+            isOneToOne: false;
+            referencedRelation: "pros";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: { [_ in never]: never };
     Functions: { [_ in never]: never };
