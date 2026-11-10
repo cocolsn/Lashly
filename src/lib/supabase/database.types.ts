@@ -7,6 +7,48 @@ export type Database = {
   };
   public: {
     Tables: {
+      booking_photos: {
+        Row: {
+          booking_id: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          pro_id: string;
+          storage_path: string;
+        };
+        Insert: {
+          booking_id: string;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          pro_id: string;
+          storage_path: string;
+        };
+        Update: {
+          booking_id?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          pro_id?: string;
+          storage_path?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_photos_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "booking_photos_pro_id_fkey";
+            columns: ["pro_id"];
+            isOneToOne: false;
+            referencedRelation: "pros";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       bookings: {
         Row: {
           addon_name: string | null;
@@ -80,45 +122,78 @@ export type Database = {
       client_records: {
         Row: {
           client_id: string;
+          contact_lenses: boolean;
           created_at: string;
           curl: string | null;
+          effect: string | null;
+          eye_shape: string | null;
           glue: string | null;
           health_consent_at: string | null;
           id: string;
           lash_type: string | null;
-          length_mm: number | null;
+          length_max_mm: number | null;
+          length_min_mm: number | null;
+          mapping_inner_mm: number | null;
+          mapping_middle_mm: number | null;
+          mapping_outer_mm: number | null;
+          natural_lashes: string | null;
           notes: string | null;
+          patch_test_on: string | null;
           pro_id: string;
           reactions: string | null;
+          sensitive_eyes: boolean;
           thickness: number | null;
+          volume: string | null;
         };
         Insert: {
           client_id: string;
+          contact_lenses?: boolean;
           created_at?: string;
           curl?: string | null;
+          effect?: string | null;
+          eye_shape?: string | null;
           glue?: string | null;
           health_consent_at?: string | null;
           id?: string;
           lash_type?: string | null;
-          length_mm?: number | null;
+          length_max_mm?: number | null;
+          length_min_mm?: number | null;
+          mapping_inner_mm?: number | null;
+          mapping_middle_mm?: number | null;
+          mapping_outer_mm?: number | null;
+          natural_lashes?: string | null;
           notes?: string | null;
+          patch_test_on?: string | null;
           pro_id: string;
           reactions?: string | null;
+          sensitive_eyes?: boolean;
           thickness?: number | null;
+          volume?: string | null;
         };
         Update: {
           client_id?: string;
+          contact_lenses?: boolean;
           created_at?: string;
           curl?: string | null;
+          effect?: string | null;
+          eye_shape?: string | null;
           glue?: string | null;
           health_consent_at?: string | null;
           id?: string;
           lash_type?: string | null;
-          length_mm?: number | null;
+          length_max_mm?: number | null;
+          length_min_mm?: number | null;
+          mapping_inner_mm?: number | null;
+          mapping_middle_mm?: number | null;
+          mapping_outer_mm?: number | null;
+          natural_lashes?: string | null;
           notes?: string | null;
+          patch_test_on?: string | null;
           pro_id?: string;
           reactions?: string | null;
+          sensitive_eyes?: boolean;
           thickness?: number | null;
+          volume?: string | null;
         };
         Relationships: [
           {

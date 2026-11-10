@@ -43,7 +43,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/espace/ag
     supabase.from("pros").select("id").eq("id", userId).maybeSingle(),
     supabase
       .from("bookings")
-      .select("id, client_id, starts_at, ends_at, status, service_name, addon_name, price_cents, clients(full_name, phone)")
+      .select("id, starts_at, ends_at, status, service_name, addon_name, price_cents, clients(full_name, phone)")
       .gte("starts_at", parisMidnightIso(first))
       .lt("starts_at", parisMidnightIso(addDays(first, span)))
       .order("starts_at"),
@@ -56,6 +56,14 @@ export default async function AgendaPage({ searchParams }: PageProps<"/espace/ag
 
   return (
     <>
+      <form role="search" action="/espace/clientes" className="mb-3 flex gap-2">
+        <label htmlFor="q" className="sr-only">Chercher une cliente</label>
+        <input id="q" name="q" type="search" placeholder="Chercher une cliente…"
+          className="min-w-0 flex-1 rounded-[10px] border border-line bg-surface px-3 py-2.5 text-ink" />
+        <button type="submit" className="cursor-pointer rounded-btn border border-line bg-surface px-3.5 font-semibold">
+          Chercher
+        </button>
+      </form>
       <div className="mb-3 flex gap-1.5" role="group" aria-label="Affichage">
         {(["jour", "semaine"] as const).map((v) => (
           <Link
@@ -107,33 +115,33 @@ export default async function AgendaPage({ searchParams }: PageProps<"/espace/ag
                 const client = b.clients;
                 return (
                   <li key={b.id} className={`${card} ${cancelled ? "opacity-60" : ""}`}>
-                    <div className="flex items-start justify-between gap-3">
+                    <Link href={`/espace/agenda/${b.id}`} className="flex items-start justify-between gap-3 no-underline">
                       <div className="min-w-0">
                         <p className={`font-semibold tabular-nums ${cancelled ? "line-through" : ""}`}>
                           {parisTime(b.starts_at)} – {parisTime(b.ends_at)}
                         </p>
-                        <Link href={`/espace/clientes/${b.client_id}`} className="block font-semibold">
-                          {client?.full_name}
-                        </Link>
+                        <p className="font-semibold">{client?.full_name}</p>
                         <p className="text-sm text-mute">
                           {b.service_name}
                           {b.addon_name && ` + ${b.addon_name}`}
                         </p>
-                        {client?.phone && (
-                          <a href={`tel:${client.phone.replace(/[^\d+]/g, "")}`} className="text-sm font-semibold">
-                            {client.phone}
-                          </a>
-                        )}
                       </div>
                       <div className="shrink-0 text-right">
                         <p className="font-semibold tabular-nums">{formatPrice(b.price_cents)}</p>
-                        {cancelled && (
+                        {cancelled ? (
                           <span className="mt-1 inline-block rounded-full bg-ok px-2 py-0.5 text-xs font-semibold text-ok-ink">
                             Annulé
                           </span>
+                        ) : (
+                          <span className="mt-1 block text-sm text-mute">Voir →</span>
                         )}
                       </div>
-                    </div>
+                    </Link>
+                    {client?.phone && (
+                      <a href={`tel:${client.phone.replace(/[^\d+]/g, "")}`} className="text-sm font-semibold">
+                        {client.phone}
+                      </a>
+                    )}
                     {b.status === "confirmed" && isUpcoming(b.starts_at) && (
                       <div className="mt-2.5">
                         <CancelButton id={b.id} label={client?.full_name ?? "cette cliente"} />
