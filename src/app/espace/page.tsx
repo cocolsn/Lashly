@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatDuration, formatPrice } from "@/lib/format";
@@ -17,7 +18,7 @@ export default async function ServicesPage({ searchParams }: PageProps<"/espace"
   if (!userId) redirect("/connexion");
 
   const [{ data: pro }, { data: services }] = await Promise.all([
-    supabase.from("pros").select("id").eq("id", userId).maybeSingle(),
+    supabase.from("pros").select("slug").eq("id", userId).maybeSingle(),
     supabase
       .from("services")
       .select(
@@ -29,10 +30,19 @@ export default async function ServicesPage({ searchParams }: PageProps<"/espace"
   if (!pro) redirect("/espace/studio");
 
   const { modifier } = await searchParams;
+  const siteHost = (await headers()).get("host") ?? "lashly";
   const editing = services?.find((s) => s.id === modifier) ?? null;
 
   return (
     <>
+      <p className="mb-4 rounded-card border border-line bg-ok px-4 py-3 text-sm text-ok-ink">
+        Ta page de réservation :{" "}
+        <Link href={`/${pro.slug}`} target="_blank" className="font-semibold break-all">
+          {siteHost}/{pro.slug}
+        </Link>
+        <span className="block">Partage ce lien à tes clientes (Instagram, WhatsApp…).</span>
+      </p>
+
       {services?.length ? (
         <ul className="mb-3 space-y-3">
           {services.map((s) => (
