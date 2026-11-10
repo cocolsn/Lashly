@@ -116,8 +116,8 @@ export function BookingFlow({ studio }: { studio: PublicStudio }) {
           </div>
           <BookingSummary service={service} withAddon={withAddon} startsAt={slot} />
           <p className="text-sm text-mute">
-            Merci {details.fullName.trim().split(" ")[0]}. {studio.studio_name} a bien reçu ta réservation. Note bien
-            la date : l’email de confirmation arrivera dans une prochaine version.
+            Merci {details.fullName.trim().split(" ")[0]}. {studio.studio_name} a bien reçu ta réservation. Tu vas
+            recevoir un email de confirmation, puis un rappel la veille de ton rendez-vous.
           </p>
           <button type="button" onClick={restart}
             className="mt-[18px] w-full cursor-pointer rounded-[10px] border border-line bg-surface px-4 py-3 font-semibold">
