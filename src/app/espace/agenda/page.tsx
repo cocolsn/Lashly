@@ -43,7 +43,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/espace/ag
     supabase.from("pros").select("id").eq("id", userId).maybeSingle(),
     supabase
       .from("bookings")
-      .select("id, starts_at, ends_at, status, service_name, addon_name, price_cents, clients(full_name, phone)")
+      .select("id, client_id, starts_at, ends_at, status, service_name, addon_name, price_cents, clients(full_name, phone)")
       .gte("starts_at", parisMidnightIso(first))
       .lt("starts_at", parisMidnightIso(addDays(first, span)))
       .order("starts_at"),
@@ -112,7 +112,9 @@ export default async function AgendaPage({ searchParams }: PageProps<"/espace/ag
                         <p className={`font-semibold tabular-nums ${cancelled ? "line-through" : ""}`}>
                           {parisTime(b.starts_at)} – {parisTime(b.ends_at)}
                         </p>
-                        <p className="font-semibold">{client?.full_name}</p>
+                        <Link href={`/espace/clientes/${b.client_id}`} className="block font-semibold">
+                          {client?.full_name}
+                        </Link>
                         <p className="text-sm text-mute">
                           {b.service_name}
                           {b.addon_name && ` + ${b.addon_name}`}
