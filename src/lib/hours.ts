@@ -9,60 +9,89 @@ export const WEEK_DAYS = [
   { weekday: 0, label: "Dimanche" },
 ] as const;
 
-export type DayHours = { weekday: number; isOpen: boolean; start: string; end: string };
+export type TimeRange = { start: string; end: string };
 
-export type Schedule = {
-  days: DayHours[];
-  pauseStart: string;
-  pauseEnd: string;
-  buffer: string;
+/**
+ * « auto » : créneaux toutes les 30 min entre ouverture et fermeture, hors pauses.
+ * « fixed » : seulement les heures de début choisies par la pro.
+ */
+export type SlotMode = "auto" | "fixed";
+
+export type DayHours = {
+  weekday: number;
+  isOpen: boolean;
+  mode: SlotMode;
+  start: string;
+  end: string;
+  breaks: TimeRange[];
+  fixedTimes: string[];
 };
+
+export type Schedule = { days: DayHours[]; buffer: string };
 
 // Réglages proposés tant que la pro n'a rien enregistré (repris du prototype).
 export const DEFAULT_SCHEDULE: Schedule = {
   days: WEEK_DAYS.map(({ weekday }) => ({
     weekday,
     isOpen: weekday >= 1 && weekday <= 5,
+    mode: "auto",
     start: "09:00",
     end: weekday === 5 ? "17:00" : "18:00",
+    breaks: [{ start: "12:30", end: "13:30" }],
+    fixedTimes: [],
   })),
-  pauseStart: "12:30",
-  pauseEnd: "13:30",
   buffer: "10",
 };
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export function isTime(value: string): boolean {
+  return TIME.test(value);
+}
 
 /** « 09:00:00 » (Postgres) → « 09:00 ». */
 export function toHHMM(time: string): string {
   return time.slice(0, 5);
 }
 
+/** Ajoute une heure à une liste triée, sans doublon. */
+export function addTime(times: string[], time: string): string[] {
+  return [...new Set([...times, time])].sort();
+}
+
 export type ScheduleErrors = {
   days?: Partial<Record<number, string>>;
-  pause?: string;
   buffer?: string;
 };
 
-/** Renvoie les erreurs en français, ou null si tout est valide. */
+function dayError(day: DayHours): string | null {
+  if (day.mode === "fixed") {
+    if (day.fixedTimes.length === 0) return "Ajoute au moins une heure, ou ferme ce jour.";
+    if (day.fixedTimes.length > 24) return "24 heures maximum par jour.";
+    if (!day.fixedTimes.every(isTime)) return "Une des heures n’est pas valide.";
+    return null;
+  }
+
+  if (!isTime(day.start) || !isTime(day.end)) return "Indique une heure d’ouverture et de fermeture.";
+  if (day.start >= day.end) return "La fermeture doit être après l’ouverture.";
+
+  const breaks = [...day.breaks].sort((a, b) => a.start.localeCompare(b.start));
+  for (const [i, b] of breaks.entries()) {
+    if (!isTime(b.start) || !isTime(b.end)) return "Indique le début et la fin de chaque pause.";
+    if (b.start >= b.end) return "La fin d’une pause doit être après son début.";
+    if (b.start < day.start || b.end > day.end) return "Les pauses doivent être pendant les heures d’ouverture.";
+    if (i > 0 && b.start < breaks[i - 1].end) return "Deux pauses se chevauchent.";
+  }
+  return null;
+}
+
+/** Renvoie les erreurs en français, ou null si tout est valide. Les jours fermés ne sont pas vérifiés. */
 export function validateSchedule(s: Schedule): ScheduleErrors | null {
   const errors: ScheduleErrors = {};
 
   for (const day of s.days) {
-    if (!TIME.test(day.start) || !TIME.test(day.end)) {
-      errors.days = { ...errors.days, [day.weekday]: "Indique une heure d’ouverture et de fermeture." };
-    } else if (day.start >= day.end) {
-      errors.days = { ...errors.days, [day.weekday]: "La fermeture doit être après l’ouverture." };
-    }
-  }
-
-  const hasPause = s.pauseStart !== "" || s.pauseEnd !== "";
-  if (hasPause) {
-    if (!TIME.test(s.pauseStart) || !TIME.test(s.pauseEnd)) {
-      errors.pause = "Indique le début et la fin de la pause, ou vide les deux.";
-    } else if (s.pauseStart >= s.pauseEnd) {
-      errors.pause = "La fin de la pause doit être après le début.";
-    }
+    const error = day.isOpen ? dayError(day) : null;
+    if (error) errors.days = { ...errors.days, [day.weekday]: error };
   }
 
   const buffer = Number(s.buffer);
@@ -71,4 +100,30 @@ export function validateSchedule(s: Schedule): ScheduleErrors | null {
   }
 
   return Object.keys(errors).length ? errors : null;
+}
+
+/** Lit un planning envoyé en JSON par le formulaire ; renvoie null s'il est mal formé. */
+export function parseSchedule(raw: unknown): Schedule | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const { days, buffer } = raw as Record<string, unknown>;
+  if (!Array.isArray(days) || typeof buffer !== "string") return null;
+
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
+  const parsed: DayHours[] = [];
+  for (const { weekday } of WEEK_DAYS) {
+    const d = days.find((x) => (x as DayHours | null)?.weekday === weekday) as Record<string, unknown> | undefined;
+    if (!d) return null;
+    parsed.push({
+      weekday,
+      isOpen: d.isOpen === true,
+      mode: d.mode === "fixed" ? "fixed" : "auto",
+      start: str(d.start),
+      end: str(d.end),
+      breaks: Array.isArray(d.breaks)
+        ? d.breaks.map((b) => ({ start: str((b as TimeRange).start), end: str((b as TimeRange).end) }))
+        : [],
+      fixedTimes: Array.isArray(d.fixedTimes) ? d.fixedTimes.map(str) : [],
+    });
+  }
+  return { days: parsed, buffer };
 }

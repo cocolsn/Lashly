@@ -5,31 +5,72 @@ export type Database = {
   };
   public: {
     Tables: {
-      opening_hours: {
+      opening_breaks: {
         Row: {
           created_at: string;
           end_time: string;
           id: string;
-          is_open: boolean;
           pro_id: string;
           start_time: string;
           weekday: number;
         };
         Insert: {
           created_at?: string;
-          end_time?: string;
+          end_time: string;
           id?: string;
-          is_open?: boolean;
           pro_id: string;
-          start_time?: string;
+          start_time: string;
           weekday: number;
         };
         Update: {
           created_at?: string;
           end_time?: string;
           id?: string;
+          pro_id?: string;
+          start_time?: string;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "opening_breaks_pro_id_fkey";
+            columns: ["pro_id"];
+            isOneToOne: false;
+            referencedRelation: "pros";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      opening_hours: {
+        Row: {
+          created_at: string;
+          end_time: string;
+          fixed_times: string[];
+          id: string;
+          is_open: boolean;
+          pro_id: string;
+          slot_mode: string;
+          start_time: string;
+          weekday: number;
+        };
+        Insert: {
+          created_at?: string;
+          end_time?: string;
+          fixed_times?: string[];
+          id?: string;
+          is_open?: boolean;
+          pro_id: string;
+          slot_mode?: string;
+          start_time?: string;
+          weekday: number;
+        };
+        Update: {
+          created_at?: string;
+          end_time?: string;
+          fixed_times?: string[];
+          id?: string;
           is_open?: boolean;
           pro_id?: string;
+          slot_mode?: string;
           start_time?: string;
           weekday?: number;
         };
@@ -49,8 +90,6 @@ export type Database = {
           city: string;
           created_at: string;
           id: string;
-          pause_end: string | null;
-          pause_start: string | null;
           phone: string | null;
           slug: string;
           studio_name: string;
@@ -60,8 +99,6 @@ export type Database = {
           city: string;
           created_at?: string;
           id: string;
-          pause_end?: string | null;
-          pause_start?: string | null;
           phone?: string | null;
           slug: string;
           studio_name: string;
@@ -71,8 +108,6 @@ export type Database = {
           city?: string;
           created_at?: string;
           id?: string;
-          pause_end?: string | null;
-          pause_start?: string | null;
           phone?: string | null;
           slug?: string;
           studio_name?: string;
