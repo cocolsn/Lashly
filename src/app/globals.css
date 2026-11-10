@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f6f5f8;
+  --surface: #ffffff;
+  --ink: #1f1726;
+  --mute: #6b6475;
+  --line: #e6e2ea;
+  --acc: #4a1d5c;
+  --acc-ink: #ffffff;
+  --ok: #f1ecf5;
+  --ok-ink: #4a1d5c;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17121c;
+    --surface: #211a28;
+    --ink: #f1ebf5;
+    --mute: #a99bb4;
+    --line: #393043;
+    --acc: #c58be0;
+    --acc-ink: #1b1022;
+    --ok: #2c2336;
+    --ok-ink: #e6c9f3;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-acc: var(--acc);
+  --color-acc-ink: var(--acc-ink);
+  --color-ok: var(--ok);
+  --color-ok-ink: var(--ok-ink);
+  --font-sans: var(--font-bricolage), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius-card: 12px;
+  --radius-btn: 8px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 3px;
+}
