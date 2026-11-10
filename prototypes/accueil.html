@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lashly · L’agenda des lash techs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f5f8;--surface:#fff;--ink:#1f1726;--mute:#6b6475;--line:#e6e2ea;--acc:#4a1d5c;--acc-ink:#fff;--soft:#eeebf2;--ok:#f1ecf5;--ok-ink:#4a1d5c;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17121c;--surface:#211a28;--ink:#f1ebf5;--mute:#a99bb4;--line:#393043;--acc:#c58be0;--acc-ink:#1b1022;--soft:#2c2336;--ok:#2c2336;--ok-ink:#e6c9f3;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17121c;--surface:#211a28;--ink:#f1ebf5;--mute:#a99bb4;--line:#393043;--acc:#c58be0;--acc-ink:#1b1022;--soft:#2c2336;--ok:#2c2336;--ok-ink:#e6c9f3;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+a{color:inherit}
+a:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.25rem;text-decoration:none;letter-spacing:-.01em}
+.mark{width:32px;height:32px;border-radius:9px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;font-weight:600;font-size:1rem}
+.btn{display:inline-block;font:inherit;font-weight:600;text-decoration:none;padding:11px 18px;border-radius:9px;border:1px solid var(--line);background:var(--surface)}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:48px 0 56px}
+h1{font-size:clamp(2.1rem,6vw,3.4rem);line-height:1.04;font-weight:800;letter-spacing:-.03em;margin:0 0 16px}
+.lead{font-size:1.1rem;color:var(--mute);max-width:46ch;margin:0 0 24px}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.mock{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 12px 32px rgba(31,23,38,.10)}
+.mock b{font-weight:600}
+.mock .m{color:var(--mute);font-size:.9rem}
+.mock hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.slot{border:1px solid var(--line);background:var(--ok);color:var(--ok-ink);border-radius:8px;padding:7px 11px;font-weight:600;font-variant-numeric:tabular-nums}
+.slot.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.feat{border-top:1px solid var(--line);padding:44px 0}
+h2{font-size:1.6rem;line-height:1.2;font-weight:600;letter-spacing:-.01em;margin:0 0 24px}
+.list{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.item{padding:18px 0;border-bottom:1px solid var(--line)}
+.item h3{margin:0 0 4px;font-size:1.05rem;font-weight:600}
+.item p{margin:0;color:var(--mute)}
+.soon{display:inline-block;margin-left:8px;font-size:.75rem;font-weight:600;color:var(--ok-ink);background:var(--ok);border-radius:99px;padding:2px 9px;vertical-align:middle}
+.end{background:var(--acc);color:var(--acc-ink);border-radius:16px;padding:40px 28px;text-align:center;margin:12px 0 40px}
+.end h2{margin-bottom:8px}
+.end p{margin:0 0 22px;opacity:.85}
+.end .btn{background:var(--acc-ink);color:var(--acc);border-color:var(--acc-ink)}
+footer{color:var(--mute);font-size:.9rem;padding:0 0 28px}
+@media (max-width:720px){.hero{grid-template-columns:1fr;gap:32px;padding-top:28px}.list{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#"><span class="mark" aria-hidden="true">L</span>Lashly</a>
+    <a class="btn" href="https://claude.ai/artifact/6sQMvZkn1mtzRS2vt7mNy4">Me connecter</a>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <h1>Ton agenda de lash tech, pensé pour ton métier.</h1>
+      <p class="lead">Réservation en ligne, fiches clientes et rappels de remplissage au même endroit. Tu poses, Lashly s’occupe du reste.</p>
+      <div class="cta">
+        <a class="btn pri" href="https://claude.ai/artifact/6sQMvZkn1mtzRS2vt7mNy4">Créer mon espace</a>
+        <a class="btn" href="#fonctions">Voir les fonctions</a>
+      </div>
+    </div>
+    <div class="mock" aria-label="Exemple de réservation">
+      <b>Volume russe</b>
+      <div class="m">2 h 30 · 110 €</div>
+      <hr>
+      <div class="m">Mardi 12 novembre</div>
+      <div class="slots"><span class="slot">09:00</span><span class="slot on">10:30</span><span class="slot">14:00</span><span class="slot">15:30</span></div>
+      <hr>
+      <div class="m">Créneau choisi : mardi à 10:30</div>
+    </div>
+  </section>
+
+  <section class="feat" id="fonctions">
+    <h2>Tout ce qu’il te faut, rien de superflu</h2>
+    <div class="list">
+      <div class="item"><h3>Réservation en ligne</h3><p>Tes clientes réservent seules, avec la bonne durée selon la prestation et tes horaires.</p></div>
+      <div class="item"><h3>Fiches clientes</h3><p>Type de pose, courbure, longueur, colle, réactions : tout est retrouvé en un coup d’œil.</p></div>
+      <div class="item"><h3>Rappels de remplissage <span class="soon">Bientôt</span></h3><p>Un message automatique à 2-3 semaines pour que ta cliente revienne avant de perdre ses cils.</p></div>
+      <div class="item"><h3>Acompte en ligne <span class="soon">Bientôt</span></h3><p>Sécurise les poses longues et réduis les rendez-vous non honorés.</p></div>
+      <div class="item"><h3>Annuaire des lash techs <span class="soon">Bientôt</span></h3><p>Ton profil visible par les clientes de ta ville, avec tes prestations et tes tarifs.</p></div>
+      <div class="item"><h3>Sur téléphone et ordinateur</h3><p>Une seule app, dans ton navigateur ou sur l’écran d’accueil de ton téléphone.</p></div>
+    </div>
+  </section>
+
+  <section class="end">
+    <h2>Prête à remplir ton agenda ?</h2>
+    <p>Configure tes prestations et tes horaires en quelques minutes.</p>
+    <a class="btn" href="https://claude.ai/artifact/6sQMvZkn1mtzRS2vt7mNy4">Créer mon espace</a>
+  </section>
+
+  <footer>© Lashly.</footer>
+</div>
+</body>
+</html>

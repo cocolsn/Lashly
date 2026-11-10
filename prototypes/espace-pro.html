@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espace pro · Lash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f5f8;--surface:#fff;--ink:#1f1726;--mute:#6b6475;--line:#e6e2ea;--acc:#4a1d5c;--acc-ink:#fff;--soft:#eeebf2;--ok:#f1ecf5;--ok-ink:#4a1d5c;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17121c;--surface:#211a28;--ink:#f1ebf5;--mute:#a99bb4;--line:#393043;--acc:#c58be0;--acc-ink:#1b1022;--soft:#2c2336;--ok:#1f3a2e;--ok-ink:#a7e3c4;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17121c;--surface:#211a28;--ink:#f1ebf5;--mute:#a99bb4;--line:#393043;--acc:#c58be0;--acc-ink:#1b1022;--soft:#2c2336;--ok:#1f3a2e;--ok-ink:#a7e3c4;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;line-height:1.2;font-weight:600;margin:0;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 20px}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tabs button{border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;color:var(--mute);font:inherit;font-weight:600;padding:10px 2px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 2px rgba(31,23,38,.05)}
+.svc{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.svc b{font-weight:600}
+.meta{color:var(--mute);font-size:.9rem}
+.price{font-weight:600;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.del{color:#b3261e}
+label{display:block;font-size:.85rem;color:var(--mute);margin:10px 0 4px}
+input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.day{display:grid;grid-template-columns:92px 1fr 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.day:last-child{border:0}
+.day label{display:flex;gap:8px;align-items:center;margin:0;color:var(--ink);font-size:1rem}
+.day input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc)}
+.day input[type=time]{padding:8px}
+.closed{color:var(--mute);grid-column:span 2;font-size:.9rem}
+.slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.slot{font:inherit;border:1px solid var(--line);background:var(--ok);color:var(--ok-ink);border-radius:8px;padding:7px 11px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer}
+.slot[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.pick{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--acc);color:var(--acc-ink);border-radius:14px;padding:12px 16px;font-weight:600;margin-top:12px}
+.empty{color:var(--mute);padding:8px 0}
+h2{font-size:1rem;margin:0 0 2px;font-weight:600;text-transform:capitalize}
+.top{display:flex;align-items:center;gap:12px;margin:6px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--ok);color:var(--ok-ink);border-radius:99px;padding:6px 12px;cursor:pointer}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><span class="mark" aria-hidden="true">L</span><h1>Mon espace pro</h1></header>
+  <p class="sub">Configure tes prestations et tes horaires, puis vois ce que verra ta cliente.</p>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-svc" aria-selected="true" onclick="go('svc')">Prestations</button>
+    <button role="tab" id="t-hrs" aria-selected="false" onclick="go('hrs')">Horaires</button>
+    <button role="tab" id="t-pre" aria-selected="false" onclick="go('pre')">Aperçu cliente</button>
+  </div>
+  <div id="view"></div>
+</main>
+<script>
+var KEY="lashpro-v1";
+var DAYS=[["Lundi",1],["Mardi",2],["Mercredi",3],["Jeudi",4],["Vendredi",5],["Samedi",6],["Dimanche",0]];
+var DEF={
+  services:[
+    {id:1,name:"Pose classique (cil à cil)",dur:120,price:80,x:"Une extension posée sur chaque cil naturel. Le résultat est naturel, avec un effet mascara qui allonge et structure le regard. Idéale pour une première pose."},
+    {id:2,name:"Volume russe",dur:150,price:110,x:"Plusieurs extensions très fines posées en éventail sur chaque cil naturel. L’effet est fourni et dense, sans alourdir le regard."},
+    {id:3,name:"Remplissage (2-3 semaines)",dur:60,price:45,x:"À faire environ 2 à 3 semaines après la pose pour remplacer les cils tombés naturellement. Au-delà, une nouvelle pose complète peut être nécessaire."},
+    {id:4,name:"Dépose",dur:30,price:25,x:"Retrait en douceur des extensions avec un produit adapté, sans abîmer les cils naturels."}
+  ],
+  hours:{1:{o:1,s:"09:00",e:"18:00"},2:{o:1,s:"09:00",e:"18:00"},3:{o:1,s:"09:00",e:"18:00"},4:{o:1,s:"09:00",e:"18:00"},5:{o:1,s:"09:00",e:"17:00"},6:{o:0,s:"09:00",e:"13:00"},0:{o:0,s:"09:00",e:"13:00"}},
+  pause:{s:"12:30",e:"13:30"},buffer:10
+};
+var S=load(),tab="svc",editId=null,pickSvc=null,picked=null;
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);o.services.forEach(function(s){var d=DEF.services.find(function(x){return x.id===s.id});if(d&&s.x===undefined)s.x=d.x});return o}}catch(e){}return JSON.parse(JSON.stringify(DEF))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function tm(t){var p=t.split(":");return +p[0]*60+ +p[1]}
+function ft(m){return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+function fd(m){var h=Math.floor(m/60),r=m%60;return (h?h+" h":"")+(r?(h?" ":"")+r+" min":"")}
+function go(t){tab=t;["svc","hrs","pre"].forEach(function(k){document.getElementById("t-"+k).setAttribute("aria-selected",k===t)});render()}
+function render(){var v=document.getElementById("view");v.innerHTML=tab==="svc"?svcView():tab==="hrs"?hrsView():preView()}
+
+function svcView(){
+  var e=S.services.find(function(s){return s.id===editId})||{name:"",dur:60,price:50};
+  var list=S.services.map(function(s){return '<div class="card svc"><div><b>'+esc(s.name)+'</b><div class="meta">'+fd(s.dur)+'</div>'+(s.x?'<div class="meta" style="max-width:34ch">'+esc(s.x)+'</div>':'')+'</div><div style="text-align:right"><div class="price">'+s.price+' €</div><button class="btn" onclick="edit('+s.id+')">Modifier</button></div></div>'}).join("")||'<p class="empty">Aucune prestation. Ajoute la première ci-dessous.</p>';
+  return list+'<div class="card"><h2>'+(editId?"Modifier la prestation":"Nouvelle prestation")+'</h2>'+(editId?'':'<p class="meta" style="margin:4px 0 8px">Ajouter rapidement, puis ajuste le prix :</p><div class="chips">'+PRE.map(function(p,i){return '<button class="chip" onclick="preset('+i+')">'+esc(p.n)+'</button>'}).join("")+'</div>')
+   +'<label for="f-n">Nom</label><input id="f-n" value="'+esc(e.name)+'" placeholder="Ex. Volume mixte">'
+   +'<div class="row"><div><label for="f-d">Durée (minutes)</label><input id="f-d" type="number" min="15" step="15" value="'+e.dur+'"></div>'
+   +'<div><label for="f-p">Prix (€)</label><input id="f-p" type="number" min="0" step="1" value="'+e.price+'"></div></div>'
+   +'<label for="f-x">Description visible par la cliente</label><textarea id="f-x" placeholder="Ex. Pose naturelle, effet mascara…">'+esc(e.x||"")+'</textarea>'
+   +'<div class="actions"><button class="btn pri" onclick="saveSvc()">'+(editId?"Enregistrer":"Ajouter la prestation")+'</button>'
+   +(editId?'<button class="btn" onclick="edit(null)">Annuler</button><button class="btn del" onclick="delSvc()">Supprimer</button>':'')+'</div></div>'
+}
+function edit(id){editId=id;render()}
+var PRE=[
+{n:"Pose wispy",d:150,x:"Un effet texturé et plumeux, avec des cils de longueurs alternées pour un regard ouvert et naturel."},
+{n:"Pose hybride",d:135,x:"Un mélange de pose classique et de volume pour un effet naturel, mais plus fourni."},
+{n:"Volume léger",d:135,x:"Deux à trois extensions fines par cil naturel pour un regard plus dense, tout en restant naturel."},
+{n:"Méga volume",d:180,x:"Un éventail de nombreuses extensions ultra fines sur chaque cil pour un effet très dense et intense."},
+{n:"Rehaussement de cils",d:60,x:"Courbure et relèvement de tes cils naturels, sans extensions. L’effet dure plusieurs semaines."},
+{n:"Teinture de cils",d:30,x:"Coloration de tes cils naturels pour un regard plus intense, sans mascara."}];
+function preset(i){var p=PRE[i];editId=null;render();document.getElementById("f-n").value=p.n;document.getElementById("f-d").value=p.d;document.getElementById("f-x").value=p.x;var f=document.getElementById("f-p");f.value="";f.focus();f.scrollIntoView({block:"center"})}
+function saveSvc(){
+  var n=document.getElementById("f-n").value.trim(),d=+document.getElementById("f-d").value,p=+document.getElementById("f-p").value,x=document.getElementById("f-x").value.trim();
+  if(!n||d<15||document.getElementById("f-p").value===""){alert("Indique un nom, une durée d’au moins 15 minutes et un prix.");return}
+  if(editId){var s=S.services.find(function(x){return x.id===editId});s.name=n;s.dur=d;s.price=p;s.x=x}
+  else S.services.push({id:Date.now(),name:n,dur:d,price:p,x:x});
+  editId=null;save();render()
+}
+function delSvc(){S.services=S.services.filter(function(s){return s.id!==editId});editId=null;save();render()}
+
+function hrsView(){
+  var rows=DAYS.map(function(d){var h=S.hours[d[1]],k=d[1];
+    return '<div class="day"><label><input type="checkbox" '+(h.o?"checked":"")+' onchange="setH('+k+',\'o\',this.checked?1:0,true)">'+d[0]+'</label>'
+    +(h.o?'<input type="time" value="'+h.s+'" aria-label="Ouverture '+d[0]+'" onchange="setH('+k+',\'s\',this.value)"><input type="time" value="'+h.e+'" aria-label="Fermeture '+d[0]+'" onchange="setH('+k+',\'e\',this.value)">':'<span class="closed">Fermé</span>')+'</div>'}).join("");
+  return '<div class="card"><h2>Jours et heures d’ouverture</h2>'+rows+'</div>'
+   +'<div class="card"><h2>Pause et temps de préparation</h2><div class="row"><div><label for="p-s">Pause début</label><input id="p-s" type="time" value="'+S.pause.s+'" onchange="S.pause.s=this.value;save()"></div>'
+   +'<div><label for="p-e">Pause fin</label><input id="p-e" type="time" value="'+S.pause.e+'" onchange="S.pause.e=this.value;save()"></div></div>'
+   +'<label for="b">Temps entre deux clientes (minutes)</label><input id="b" type="number" min="0" step="5" value="'+S.buffer+'" onchange="S.buffer=+this.value||0;save()"></div>'
+}
+function setH(k,f,v,re){S.hours[k][f]=v;save();if(re)render()}
+
+function slotsFor(date,dur){
+  var h=S.hours[date.getDay()];if(!h||!h.o)return[];
+  var o=tm(h.s),c=tm(h.e),ps=tm(S.pause.s),pe=tm(S.pause.e),out=[];
+  var now=new Date(),isToday=date.toDateString()===now.toDateString(),nm=now.getHours()*60+now.getMinutes();
+  for(var s=o;s+dur<=c;s+=30){
+    if(s<pe&&s+dur>ps)continue;
+    if(isToday&&s<=nm)continue;
+    out.push(s)}
+  return out
+}
+function preView(){
+  if(!S.services.length)return '<p class="empty">Ajoute une prestation pour voir les créneaux.</p>';
+  if(!pickSvc||!S.services.some(function(s){return s.id===pickSvc}))pickSvc=S.services[0].id;
+  var sv=S.services.find(function(s){return s.id===pickSvc});
+  var opts=S.services.map(function(s){return '<option value="'+s.id+'"'+(s.id===pickSvc?" selected":"")+'>'+esc(s.name)+' · '+fd(s.dur)+' · '+s.price+' €</option>'}).join("");
+  var html='<div class="card"><label for="ps" style="margin-top:0">Prestation choisie par la cliente</label><select id="ps" onchange="pickSvc=+this.value;picked=null;render()">'+opts+'</select>'+(sv.x?'<p class="meta" style="margin:10px 0 0">'+esc(sv.x)+'</p>':'')+'</div>';
+  var any=false;
+  for(var i=0;i<7;i++){
+    var d=new Date();d.setDate(d.getDate()+i);
+    var sl=slotsFor(d,sv.dur+S.buffer);if(!sl.length)continue;any=true;
+    var label=d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+    html+='<div class="card"><h2>'+label+'</h2><div class="slots">'+sl.map(function(s){var key=d.toDateString()+s;return '<button class="slot" aria-pressed="'+(picked&&picked.k===key)+'" onclick="pick(\''+key+'\',\''+label+'\','+s+')">'+ft(s)+'</button>'}).join("")+'</div></div>'
+  }
+  if(!any)html+='<p class="empty">Aucun créneau cette semaine. Ouvre des jours dans l’onglet Horaires.</p>';
+  if(picked)html+='<div class="pick">Créneau choisi : '+picked.l+' à '+ft(picked.s)+'<br>'+esc(sv.name)+' · '+sv.price+' €</div>';
+  return html
+}
+function pick(k,l,s){picked={k:k,l:l,s:s};render()}
+render();
+</script>
+</body>
+</html>
