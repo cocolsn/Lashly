@@ -41,9 +41,17 @@ Réglages faits une fois dans le tableau de bord Supabase :
 
 La structure de la base est dans `supabase/migrations/` (déjà appliquée au projet). Les fichiers `supabase/tests/*.sql` vérifient que chaque pro ne voit que ses données : à lancer dans *SQL Editor*, tout est annulé à la fin.
 
-### 3. Resend (emails)
+### 3. Resend (emails aux clientes)
 
-Pas utile avant l’étape 7. On s’en occupera à ce moment-là.
+Les emails (confirmation, rappel la veille vers 17 h–18 h, annulation) partent directement de la base Supabase
+(`supabase/migrations/20261111130000_booking_emails.sql`). Aucune donnée de santé n’y figure.
+
+1. Crée un compte sur [resend.com](https://resend.com), puis **API Keys > Create API Key** (droit *Sending access*).
+2. Dans Supabase : **Integrations > Vault > Add new secret**, nom `resend_api_key`, valeur = la clé Resend.
+   La clé ne va ni dans le code ni dans Vercel.
+3. Tant qu’aucun domaine n’est vérifié dans Resend, les emails ne peuvent partir que vers l’adresse du compte Resend
+   (expéditeur `onboarding@resend.dev`). Une fois le nom de domaine acheté et vérifié dans Resend (région UE),
+   mettre à jour l’expéditeur : `update private.settings set value = 'Nom du studio <rdv@domaine.fr>' where key = 'email_from';`
 
 ## Variables d’environnement
 
