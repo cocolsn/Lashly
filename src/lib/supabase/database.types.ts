@@ -5,6 +5,44 @@ export type Database = {
   };
   public: {
     Tables: {
+      opening_hours: {
+        Row: {
+          created_at: string;
+          end_time: string;
+          id: string;
+          is_open: boolean;
+          pro_id: string;
+          start_time: string;
+          weekday: number;
+        };
+        Insert: {
+          created_at?: string;
+          end_time?: string;
+          id?: string;
+          is_open?: boolean;
+          pro_id: string;
+          start_time?: string;
+          weekday: number;
+        };
+        Update: {
+          created_at?: string;
+          end_time?: string;
+          id?: string;
+          is_open?: boolean;
+          pro_id?: string;
+          start_time?: string;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "opening_hours_pro_id_fkey";
+            columns: ["pro_id"];
+            isOneToOne: false;
+            referencedRelation: "pros";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       pros: {
         Row: {
           buffer_minutes: number;
