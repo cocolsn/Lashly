@@ -15,22 +15,42 @@ export type EditableService = {
   price_cents: number;
   description: string | null;
   active: boolean;
+  addon_name: string | null;
+  addon_price_cents: number | null;
+  addon_duration_min: number | null;
 };
 
 function toValues(service: EditableService | null): ServiceValues {
-  if (!service) return { name: "", duration: "60", price: "", description: "", active: true };
+  if (!service) {
+    return {
+      name: "",
+      duration: "60",
+      price: "",
+      description: "",
+      active: true,
+      hasAddon: false,
+      addonName: "",
+      addonPrice: "",
+      addonDuration: "15",
+    };
+  }
   return {
     name: service.name,
     duration: String(service.duration_min),
     price: centsToInput(service.price_cents),
     description: service.description ?? "",
     active: service.active,
+    hasAddon: service.addon_name !== null,
+    addonName: service.addon_name ?? "",
+    addonPrice: service.addon_price_cents === null ? "" : centsToInput(service.addon_price_cents),
+    addonDuration: String(service.addon_duration_min ?? 15),
   };
 }
 
 export function ServiceForm({ service }: { service: EditableService | null }) {
   const [state, formAction] = useActionState(saveService, {});
   const [values, setValues] = useState<ServiceValues>(() => toValues(service));
+  const [preset, setPreset] = useState<string | null>(null);
   const priceRef = useRef<HTMLInputElement>(null);
   const errors = state.fieldErrors ?? {};
 
@@ -45,25 +65,36 @@ export function ServiceForm({ service }: { service: EditableService | null }) {
         <>
           <p className="mt-1 mb-2 text-sm text-mute">Ajouter rapidement, puis ajuste le prix :</p>
           <div className="mb-1 flex flex-wrap gap-1.5">
-            {SERVICE_PRESETS.map((preset) => (
-              <button
-                key={preset.name}
-                type="button"
-                className="cursor-pointer rounded-full border border-line bg-ok px-3 py-1.5 text-sm text-ok-ink"
-                onClick={() => {
-                  setValues((v) => ({
-                    ...v,
-                    name: preset.name,
-                    duration: String(preset.duration),
-                    description: preset.description,
-                    price: "",
-                  }));
-                  priceRef.current?.focus();
-                }}
-              >
-                {preset.name}
-              </button>
-            ))}
+            {SERVICE_PRESETS.map((p) => {
+              const selected = preset === p.name;
+              return (
+                <button
+                  key={p.name}
+                  type="button"
+                  aria-pressed={selected}
+                  className={`cursor-pointer rounded-full border bg-ok px-3 py-1.5 text-sm text-ok-ink ${
+                    selected ? "border-ink ring-1 ring-ink" : "border-line"
+                  }`}
+                  onClick={() => {
+                    setPreset(p.name);
+                    setValues((v) => ({
+                      ...v,
+                      name: p.name,
+                      duration: String(p.duration),
+                      description: p.description,
+                      price: "",
+                      hasAddon: Boolean(p.addon),
+                      addonName: p.addon?.name ?? "",
+                      addonPrice: "",
+                      addonDuration: String(p.addon?.duration ?? 15),
+                    }));
+                    priceRef.current?.focus();
+                  }}
+                >
+                  {p.name}
+                </button>
+              );
+            })}
           </div>
         </>
       )}
@@ -111,6 +142,58 @@ export function ServiceForm({ service }: { service: EditableService | null }) {
         onChange={(e) => set("description", e.target.value)}
         error={errors.description}
       />
+      <fieldset className="mt-4 rounded-card border border-line px-3 pb-3">
+        <legend className="px-1 text-sm text-mute">Option (facultatif)</legend>
+        <label className="flex items-center gap-2.5">
+          <input
+            type="checkbox"
+            name="has_addon"
+            checked={values.hasAddon}
+            onChange={(e) => set("hasAddon", e.target.checked)}
+            className="size-[18px] accent-acc"
+          />
+          Proposer une option en plus, ex. + teinture de cils
+        </label>
+        {values.hasAddon && (
+          <>
+            <Field
+              name="addon_name"
+              label="Nom de l’option"
+              required
+              placeholder="Ex. Teinture de cils"
+              value={values.addonName}
+              onChange={(e) => set("addonName", e.target.value)}
+              error={errors.addonName}
+            />
+            <div className="flex gap-2.5 *:flex-1">
+              <Field
+                name="addon_price"
+                label="Prix en plus (€)"
+                inputMode="decimal"
+                required
+                placeholder="Ex. 15"
+                value={values.addonPrice}
+                onChange={(e) => set("addonPrice", e.target.value)}
+                error={errors.addonPrice}
+              />
+              <Field
+                name="addon_duration"
+                label="Temps en plus (min)"
+                type="number"
+                inputMode="numeric"
+                min={0}
+                max={120}
+                step={5}
+                required
+                value={values.addonDuration}
+                onChange={(e) => set("addonDuration", e.target.value)}
+                error={errors.addonDuration}
+              />
+            </div>
+          </>
+        )}
+      </fieldset>
+
       <label className="mt-3 flex items-center gap-2.5">
         <input
           type="checkbox"

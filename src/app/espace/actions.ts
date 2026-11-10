@@ -11,6 +11,10 @@ export type ServiceValues = {
   price: string;
   description: string;
   active: boolean;
+  hasAddon: boolean;
+  addonName: string;
+  addonPrice: string;
+  addonDuration: string;
 };
 
 export type ServiceState = {
@@ -35,6 +39,10 @@ export async function saveService(_prev: ServiceState, formData: FormData): Prom
     price: String(formData.get("price") ?? "").trim(),
     description: String(formData.get("description") ?? "").trim(),
     active: formData.get("active") === "on",
+    hasAddon: formData.get("has_addon") === "on",
+    addonName: String(formData.get("addon_name") ?? "").trim().replace(/\s+/g, " "),
+    addonPrice: String(formData.get("addon_price") ?? "").trim(),
+    addonDuration: String(formData.get("addon_duration") ?? "").trim(),
   };
 
   const fieldErrors: ServiceState["fieldErrors"] = {};
@@ -52,6 +60,19 @@ export async function saveService(_prev: ServiceState, formData: FormData): Prom
   if (values.description.length > 1000) {
     fieldErrors.description = "La description doit faire 1 000 caractères maximum.";
   }
+  const addonPriceCents = values.hasAddon ? parsePriceToCents(values.addonPrice) : null;
+  const addonDuration = Number(values.addonDuration);
+  if (values.hasAddon) {
+    if (values.addonName.length < 2 || values.addonName.length > 80) {
+      fieldErrors.addonName = "Indique le nom de l’option (2 à 80 caractères).";
+    }
+    if (addonPriceCents === null || addonPriceCents > 100000) {
+      fieldErrors.addonPrice = "Indique le prix de l’option en euros, par exemple 15.";
+    }
+    if (!Number.isInteger(addonDuration) || addonDuration < 0 || addonDuration > 120 || addonDuration % 5 !== 0) {
+      fieldErrors.addonDuration = "Indique de 0 à 120 minutes (par 5 minutes).";
+    }
+  }
   if (Object.keys(fieldErrors).length > 0 || priceCents === null) return { values, fieldErrors };
 
   const { supabase, userId } = await requireUserId();
@@ -61,6 +82,9 @@ export async function saveService(_prev: ServiceState, formData: FormData): Prom
     price_cents: priceCents,
     description: values.description || null,
     active: values.active,
+    addon_name: values.hasAddon ? values.addonName : null,
+    addon_price_cents: values.hasAddon ? addonPriceCents : null,
+    addon_duration_min: values.hasAddon ? addonDuration : null,
   };
 
   let error;

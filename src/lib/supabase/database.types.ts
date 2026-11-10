@@ -44,6 +44,9 @@ export type Database = {
       services: {
         Row: {
           active: boolean;
+          addon_duration_min: number | null;
+          addon_name: string | null;
+          addon_price_cents: number | null;
           created_at: string;
           description: string | null;
           duration_min: number;
@@ -55,6 +58,9 @@ export type Database = {
         };
         Insert: {
           active?: boolean;
+          addon_duration_min?: number | null;
+          addon_name?: string | null;
+          addon_price_cents?: number | null;
           created_at?: string;
           description?: string | null;
           duration_min: number;
@@ -66,6 +72,9 @@ export type Database = {
         };
         Update: {
           active?: boolean;
+          addon_duration_min?: number | null;
+          addon_name?: string | null;
+          addon_price_cents?: number | null;
           created_at?: string;
           description?: string | null;
           duration_min?: number;
