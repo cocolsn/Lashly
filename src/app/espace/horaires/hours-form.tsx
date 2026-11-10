@@ -34,8 +34,8 @@ export function HoursForm({ initial }: { initial: Schedule }) {
       <section className={card}>
         <h2 className="font-semibold">Jours et heures d’ouverture</h2>
         <p className="mt-1 text-sm text-mute">
-          Pour chaque jour : des créneaux automatiques entre l’ouverture et la fermeture (toutes les 30 min, hors
-          pauses), ou seulement des heures fixes que tu choisis.
+          Pour chaque jour : des créneaux automatiques entre l’ouverture et la fermeture (hors pauses), ou
+          seulement des heures fixes que tu choisis.
         </p>
         {WEEK_DAYS.map(({ weekday, label }) => {
           const day = schedule.days.find((d) => d.weekday === weekday)!;
@@ -53,7 +53,20 @@ export function HoursForm({ initial }: { initial: Schedule }) {
       </section>
 
       <section className={card}>
-        <h2 className="font-semibold">Temps de préparation</h2>
+        <h2 className="font-semibold">Créneaux et préparation</h2>
+        <Field
+          name="step"
+          label="Créneaux automatiques : un début possible toutes les (minutes)"
+          type="number"
+          inputMode="numeric"
+          min={5}
+          max={240}
+          step={5}
+          value={schedule.step}
+          onChange={(e) => setSchedule((s) => ({ ...s, step: e.target.value }))}
+          hint="Ex. 30 : 9:00, 9:30, 10:00… ; 15 : 9:00, 9:15, 9:30…"
+          error={errors.step}
+        />
         <Field
           name="buffer"
           label="Temps entre deux clientes (minutes)"

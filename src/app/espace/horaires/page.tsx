@@ -13,7 +13,7 @@ export default async function HoursPage() {
   if (!userId) redirect("/connexion");
 
   const [{ data: pro }, { data: rows }, { data: breaks }] = await Promise.all([
-    supabase.from("pros").select("buffer_minutes").eq("id", userId).maybeSingle(),
+    supabase.from("pros").select("slot_step_minutes, buffer_minutes").eq("id", userId).maybeSingle(),
     supabase.from("opening_hours").select("weekday, is_open, slot_mode, start_time, end_time, fixed_times"),
     supabase.from("opening_breaks").select("weekday, start_time, end_time").order("start_time"),
   ]);
@@ -37,6 +37,7 @@ export default async function HoursPage() {
             fixedTimes: row.fixed_times.map(toHHMM),
           };
         }),
+        step: String(pro.slot_step_minutes),
         buffer: String(pro.buffer_minutes),
       }
     : DEFAULT_SCHEDULE;

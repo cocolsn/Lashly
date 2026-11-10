@@ -52,7 +52,10 @@ export async function saveHours(prev: HoursState, formData: FormData): Promise<H
 
   const [hours, pro, cleared] = await Promise.all([
     supabase.from("opening_hours").upsert(hoursRows, { onConflict: "pro_id,weekday" }),
-    supabase.from("pros").update({ buffer_minutes: Number(schedule.buffer) }).eq("id", userId),
+    supabase
+      .from("pros")
+      .update({ slot_step_minutes: Number(schedule.step), buffer_minutes: Number(schedule.buffer) })
+      .eq("id", userId),
     supabase.from("opening_breaks").delete().eq("pro_id", userId),
   ]);
   if (hours.error || pro.error || cleared.error) return { schedule, error: SAVE_FAILED };

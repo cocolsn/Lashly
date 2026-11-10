@@ -1,5 +1,5 @@
--- Horaires, suite : chaque jour peut être en mode « automatique » (créneaux toutes les 30 min
--- entre ouverture et fermeture, moins les pauses) ou « heures fixes » (liste d'heures de début
+-- Horaires, suite : chaque jour peut être en mode « automatique » (créneaux réguliers entre
+-- ouverture et fermeture, moins les pauses, avec un intervalle choisi par la pro) ou « heures fixes » (liste d'heures de début
 -- choisies par la pro). Les pauses deviennent multiples et propres à chaque jour.
 
 alter table public.opening_hours
@@ -37,3 +37,8 @@ grant select, insert, delete on public.opening_breaks to authenticated;
 -- L'ancienne pause unique est remplacée par opening_breaks (aucune donnée à reprendre au moment
 -- de cette migration : aucune pause n'avait été enregistrée).
 alter table public.pros drop column pause_start, drop column pause_end;
+
+-- Intervalle entre deux débuts de créneau en mode automatique (30 min par défaut).
+alter table public.pros
+  add column slot_step_minutes integer not null default 30
+    check (slot_step_minutes between 5 and 240 and slot_step_minutes % 5 = 0);

@@ -91,6 +91,7 @@ export type Database = {
           created_at: string;
           id: string;
           phone: string | null;
+          slot_step_minutes: number;
           slug: string;
           studio_name: string;
         };
@@ -100,6 +101,7 @@ export type Database = {
           created_at?: string;
           id: string;
           phone?: string | null;
+          slot_step_minutes?: number;
           slug: string;
           studio_name: string;
         };
@@ -109,6 +111,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           phone?: string | null;
+          slot_step_minutes?: number;
           slug?: string;
           studio_name?: string;
         };

@@ -12,7 +12,7 @@ export const WEEK_DAYS = [
 export type TimeRange = { start: string; end: string };
 
 /**
- * « auto » : créneaux toutes les 30 min entre ouverture et fermeture, hors pauses.
+ * « auto » : créneaux réguliers (intervalle choisi par la pro) entre ouverture et fermeture, hors pauses.
  * « fixed » : seulement les heures de début choisies par la pro.
  */
 export type SlotMode = "auto" | "fixed";
@@ -27,7 +27,8 @@ export type DayHours = {
   fixedTimes: string[];
 };
 
-export type Schedule = { days: DayHours[]; buffer: string };
+/** step : minutes entre deux débuts de créneau (mode auto) ; buffer : temps entre deux clientes. */
+export type Schedule = { days: DayHours[]; step: string; buffer: string };
 
 // Réglages proposés tant que la pro n'a rien enregistré (repris du prototype).
 export const DEFAULT_SCHEDULE: Schedule = {
@@ -40,6 +41,7 @@ export const DEFAULT_SCHEDULE: Schedule = {
     breaks: [{ start: "12:30", end: "13:30" }],
     fixedTimes: [],
   })),
+  step: "30",
   buffer: "10",
 };
 
@@ -61,6 +63,7 @@ export function addTime(times: string[], time: string): string[] {
 
 export type ScheduleErrors = {
   days?: Partial<Record<number, string>>;
+  step?: string;
   buffer?: string;
 };
 
@@ -94,6 +97,11 @@ export function validateSchedule(s: Schedule): ScheduleErrors | null {
     if (error) errors.days = { ...errors.days, [day.weekday]: error };
   }
 
+  const step = Number(s.step);
+  if (s.step === "" || !Number.isInteger(step) || step < 5 || step > 240 || step % 5 !== 0) {
+    errors.step = "Indique de 5 à 240 minutes (par 5 minutes).";
+  }
+
   const buffer = Number(s.buffer);
   if (s.buffer === "" || !Number.isInteger(buffer) || buffer < 0 || buffer > 120 || buffer % 5 !== 0) {
     errors.buffer = "Indique de 0 à 120 minutes (par 5 minutes).";
@@ -105,8 +113,8 @@ export function validateSchedule(s: Schedule): ScheduleErrors | null {
 /** Lit un planning envoyé en JSON par le formulaire ; renvoie null s'il est mal formé. */
 export function parseSchedule(raw: unknown): Schedule | null {
   if (typeof raw !== "object" || raw === null) return null;
-  const { days, buffer } = raw as Record<string, unknown>;
-  if (!Array.isArray(days) || typeof buffer !== "string") return null;
+  const { days, step, buffer } = raw as Record<string, unknown>;
+  if (!Array.isArray(days) || typeof step !== "string" || typeof buffer !== "string") return null;
 
   const str = (v: unknown) => (typeof v === "string" ? v : "");
   const parsed: DayHours[] = [];
@@ -125,5 +133,5 @@ export function parseSchedule(raw: unknown): Schedule | null {
       fixedTimes: Array.isArray(d.fixedTimes) ? d.fixedTimes.map(str) : [],
     });
   }
-  return { days: parsed, buffer };
+  return { days: parsed, step, buffer };
 }

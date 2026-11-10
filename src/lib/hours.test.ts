@@ -60,6 +60,20 @@ describe("temps entre deux clientes", () => {
   });
 });
 
+describe("intervalle entre deux créneaux", () => {
+  it("accepte 10, 15, 30 ou 60 minutes", () => {
+    for (const step of ["10", "15", "30", "60"]) {
+      expect(validateSchedule({ ...DEFAULT_SCHEDULE, step })).toBeNull();
+    }
+  });
+
+  it("refuse moins de 5 minutes, plus de 4 h ou hors pas de 5", () => {
+    for (const step of ["0", "300", "12", ""]) {
+      expect(validateSchedule({ ...DEFAULT_SCHEDULE, step })?.step).toBeDefined();
+    }
+  });
+});
+
 describe("addTime", () => {
   it("trie et retire les doublons", () => {
     expect(addTime(["15:00", "10:00"], "10:00")).toEqual(["10:00", "15:00"]);
@@ -74,7 +88,7 @@ describe("parseSchedule", () => {
 
   it("refuse une donnée mal formée", () => {
     expect(parseSchedule(null)).toBeNull();
-    expect(parseSchedule({ days: [], buffer: "10" })).toBeNull();
+    expect(parseSchedule({ days: [], step: "30", buffer: "10" })).toBeNull();
   });
 });
 
