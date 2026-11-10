@@ -10,6 +10,7 @@
   --acc-ink: #ffffff;
   --ok: #f1ecf5;
   --ok-ink: #4a1d5c;
+  --err: #b3261e;
   color-scheme: light;
 }
 
@@ -24,6 +25,7 @@
     --acc-ink: #1b1022;
     --ok: #2c2336;
     --ok-ink: #e6c9f3;
+    --err: #f2b8b5;
     color-scheme: dark;
   }
 }
@@ -38,6 +40,7 @@
   --color-acc-ink: var(--acc-ink);
   --color-ok: var(--ok);
   --color-ok-ink: var(--ok-ink);
+  --color-err: var(--err);
   --font-sans: var(--font-bricolage), system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius-card: 12px;
   --radius-btn: 8px;
