@@ -65,7 +65,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     };
   }
 
-  redirect("/espace");
+  redirect("/espace/agenda");
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -80,5 +80,5 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
 
   if (error) return { email, error: authMessage(error.code) };
 
-  redirect("/espace");
+  redirect("/espace/agenda");
 }
