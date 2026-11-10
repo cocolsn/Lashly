@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseDecimal, validateRecord, type RecordErrors, type RecordValues } from "@/lib/client-record";
+import { PHOTO_BUCKET } from "@/lib/photos";
 import { createClient } from "@/lib/supabase/server";
 
 const SAVE_FAILED = "L’enregistrement n’a pas marché. Réessaie dans un instant.";
@@ -64,13 +65,24 @@ export async function saveRecord(
   _prev: RecordState,
   formData: FormData,
 ): Promise<RecordState> {
-  const text = (key: keyof RecordValues) => String(formData.get(key) ?? "").trim();
+  const text = (key: string) => String(formData.get(key) ?? "").trim();
   const values: RecordValues = {
     lashType: text("lashType"),
+    effect: text("effect"),
+    volume: text("volume"),
     curl: text("curl"),
-    length: text("length"),
     thickness: text("thickness"),
+    lengthMin: text("lengthMin"),
+    lengthMax: text("lengthMax"),
+    mappingInner: text("mappingInner"),
+    mappingMiddle: text("mappingMiddle"),
+    mappingOuter: text("mappingOuter"),
     glue: text("glue"),
+    eyeShape: text("eyeShape"),
+    naturalLashes: text("naturalLashes"),
+    sensitiveEyes: formData.get("sensitiveEyes") === "on",
+    contactLenses: formData.get("contactLenses") === "on",
+    patchTestOn: text("patchTestOn"),
     reactions: text("reactions"),
     notes: text("notes"),
   };
@@ -84,10 +96,21 @@ export async function saveRecord(
       pro_id: userId,
       client_id: clientId,
       lash_type: values.lashType || null,
+      effect: values.effect || null,
+      volume: values.volume || null,
       curl: values.curl || null,
-      length_mm: parseDecimal(values.length),
       thickness: parseDecimal(values.thickness),
+      length_min_mm: parseDecimal(values.lengthMin),
+      length_max_mm: parseDecimal(values.lengthMax),
+      mapping_inner_mm: parseDecimal(values.mappingInner),
+      mapping_middle_mm: parseDecimal(values.mappingMiddle),
+      mapping_outer_mm: parseDecimal(values.mappingOuter),
       glue: values.glue || null,
+      eye_shape: values.eyeShape || null,
+      natural_lashes: values.naturalLashes || null,
+      sensitive_eyes: values.sensitiveEyes,
+      contact_lenses: values.contactLenses,
+      patch_test_on: values.patchTestOn || null,
       reactions: values.reactions || null,
       notes: values.notes || null,
       ...(consentGiven && !hasHealthConsent ? { health_consent_at: new Date().toISOString() } : {}),
@@ -103,9 +126,36 @@ export async function saveRecord(
 // --- Suppression (droit à l'effacement) ---
 
 export async function deleteClient(clientId: string) {
-  const { supabase } = await requireUser();
-  // La fiche et les rendez-vous de la cliente sont supprimés avec elle (on delete cascade).
+  const { supabase, userId } = await requireUser();
+
+  // Photos : les fichiers ne sont pas supprimés automatiquement avec la base, on les efface d'abord.
+  const folder = `${userId}/${clientId}`;
+  const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(folder, { limit: 1000 });
+  if (files?.length) {
+    await supabase.storage.from(PHOTO_BUCKET).remove(files.map((f) => `${folder}/${f.name}`));
+  }
+
+  // La fiche, les rendez-vous et les photos (lignes) partent avec la cliente (on delete cascade).
   await supabase.from("clients").delete().eq("id", clientId);
   revalidatePath("/espace/clientes");
   redirect("/espace/clientes");
+}
+
+// --- Photos ---
+
+export async function deletePhoto(clientId: string, photoId: string): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
+  const { data: photo } = await supabase.from("booking_photos").select("storage_path").eq("id", photoId).maybeSingle();
+  if (!photo) return { error: "Cette photo n’existe plus. Recharge la page." };
+
+  const { error: fileError } = await supabase.storage.from(PHOTO_BUCKET).remove([photo.storage_path]);
+  const { error } = await supabase.from("booking_photos").delete().eq("id", photoId);
+  if (fileError || error) return { error: "La suppression n’a pas marché. Réessaie dans un instant." };
+
+  revalidatePath(`/espace/clientes/${clientId}`);
+  return {};
+}
+
+export async function refreshClient(clientId: string) {
+  revalidatePath(`/espace/clientes/${clientId}`);
 }

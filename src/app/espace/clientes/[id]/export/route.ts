@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext<"/espa
   const { data: client } = await supabase
     .from("clients")
     .select(
-      "full_name, phone, email, consent_at, created_at, client_records(lash_type, curl, length_mm, thickness, glue, reactions, health_consent_at, notes), bookings(starts_at, ends_at, service_name, addon_name, price_cents, status)",
+      "full_name, phone, email, consent_at, created_at, client_records(*), bookings(starts_at, ends_at, service_name, addon_name, price_cents, status, booking_photos(kind, created_at))",
     )
     .eq("id", id)
     .maybeSingle();

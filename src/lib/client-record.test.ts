@@ -1,7 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { decimalToInput, parseDecimal, validateRecord, type RecordValues } from "./client-record";
+import { decimalToInput, hasHealthInfo, parseDecimal, validateRecord, type RecordValues } from "./client-record";
 
-const empty: RecordValues = { lashType: "", curl: "", length: "", thickness: "", glue: "", reactions: "", notes: "" };
+const empty: RecordValues = {
+  lashType: "",
+  effect: "",
+  volume: "",
+  curl: "",
+  thickness: "",
+  lengthMin: "",
+  lengthMax: "",
+  mappingInner: "",
+  mappingMiddle: "",
+  mappingOuter: "",
+  glue: "",
+  eyeShape: "",
+  naturalLashes: "",
+  sensitiveEyes: false,
+  contactLenses: false,
+  patchTestOn: "",
+  reactions: "",
+  notes: "",
+};
 
 describe("parseDecimal", () => {
   it("accepte virgule, point et « mm »", () => {
@@ -27,23 +46,49 @@ describe("decimalToInput", () => {
 describe("validateRecord", () => {
   it("accepte une fiche vide ou complète", () => {
     expect(validateRecord(empty, false, false)).toEqual({});
-    expect(
-      validateRecord(
-        { ...empty, lashType: "Hybride", curl: "CC", length: "11,5", thickness: "0,07", glue: "Sky S+" },
-        false,
-        false,
-      ),
-    ).toEqual({});
+    const full: RecordValues = {
+      ...empty,
+      lashType: "Hybride",
+      effect: "Cat eye",
+      volume: "3D",
+      curl: "CC",
+      thickness: "0,07",
+      lengthMin: "8",
+      lengthMax: "12",
+      mappingInner: "8",
+      mappingMiddle: "10",
+      mappingOuter: "12",
+      glue: "Sky S+",
+      eyeShape: "Amande",
+      naturalLashes: "Fins",
+      patchTestOn: "2026-11-01",
+    };
+    expect(validateRecord(full, false, false)).toEqual({});
   });
 
   it("refuse une courbure inconnue et des mesures impossibles", () => {
-    const errors = validateRecord({ ...empty, curl: "Z", length: "45", thickness: "2" }, false, false);
-    expect(Object.keys(errors).sort()).toEqual(["curl", "length", "thickness"]);
+    const errors = validateRecord({ ...empty, curl: "Z", lengthMin: "45", thickness: "2", mappingOuter: "abc" }, false, false);
+    expect(Object.keys(errors).sort()).toEqual(["curl", "lengthMin", "mappingOuter", "thickness"]);
   });
 
-  it("exige l'accord de la cliente pour noter des réactions", () => {
-    expect(validateRecord({ ...empty, reactions: "Yeux qui piquent" }, false, false).healthConsent).toBeDefined();
-    expect(validateRecord({ ...empty, reactions: "Yeux qui piquent" }, false, true)).toEqual({});
-    expect(validateRecord({ ...empty, reactions: "Yeux qui piquent" }, true, false)).toEqual({});
+  it("refuse une longueur mini plus grande que la maxi", () => {
+    expect(validateRecord({ ...empty, lengthMin: "13", lengthMax: "9" }, false, false).lengthMax).toBeDefined();
+  });
+
+  it("exige l'accord de la cliente pour toute information de santé", () => {
+    for (const health of [{ reactions: "Yeux qui piquent" }, { sensitiveEyes: true }, { contactLenses: true }]) {
+      const v = { ...empty, ...health };
+      expect(validateRecord(v, false, false).healthConsent).toBeDefined();
+      expect(validateRecord(v, false, true)).toEqual({});
+      expect(validateRecord(v, true, false)).toEqual({});
+    }
+  });
+});
+
+describe("hasHealthInfo", () => {
+  it("détecte réactions, yeux sensibles et lentilles", () => {
+    expect(hasHealthInfo(empty)).toBe(false);
+    expect(hasHealthInfo({ ...empty, reactions: " " })).toBe(false);
+    expect(hasHealthInfo({ ...empty, contactLenses: true })).toBe(true);
   });
 });
